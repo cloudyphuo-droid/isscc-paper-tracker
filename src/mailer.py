@@ -41,13 +41,27 @@ class Mailer:
         msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
         msg.attach(MIMEText(html_body, 'html', 'utf-8'))
         
+        # 尝试不同的连接方式
+        if self.smtp_port == 465:
+            # 使用SSL
+            try:
+                server = smtplib.SMTP_SSL(self.smtp_host, self.smtp_port)
+                server.login(self.username, self.password)
+                server.sendmail(self.username, to_emails, msg.as_string())
+                server.quit()
+                print(f"Email sent successfully (SSL) to {len(to_emails)} recipients")
+                return True
+            except Exception as e:
+                print(f"SSL connection failed: {e}, trying STARTTLS...")
+        
+        # 使用STARTTLS (默认587)
         try:
             server = smtplib.SMTP(self.smtp_host, self.smtp_port)
             server.starttls()
             server.login(self.username, self.password)
             server.sendmail(self.username, to_emails, msg.as_string())
             server.quit()
-            print(f"Email sent successfully to {len(to_emails)} recipients")
+            print(f"Email sent successfully (STARTTLS) to {len(to_emails)} recipients")
             return True
         except Exception as e:
             print(f"Email send error: {e}")
