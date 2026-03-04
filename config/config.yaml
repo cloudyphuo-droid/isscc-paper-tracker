@@ -2,6 +2,7 @@
 
 tracker:
   conferences:
+    # ISSCC - 固态电路 (最顶级)
     - name: "ISSCC"
       year: 2025
       keywords:
@@ -15,17 +16,65 @@ tracker:
         - "PLL"
         - "RF"
         - "power"
-  
+        - "AI chip"
+        - "processor"
+    
+    # DAC - 设计自动化会议
+    - name: "DAC"
+      year: 2025
+      keywords:
+        - "EDA"
+        - "design automation"
+        - "physical design"
+        - "verification"
+        - "synthesis"
+    
+    # ICCAD - 计算机辅助设计
+    - name: "ICCAD"
+      year: 2025
+      keywords:
+        - "CAD"
+        - "VLSI"
+        - "physical design"
+        - "timing"
+        - "power"
+    
+    # DATE - 欧洲设计自动化
+    - name: "DATE"
+      year: 2025
+      keywords:
+        - "design"
+        - "automation"
+        - "test"
+        - "VLSI"
+    
+    # VLSI Symposium - VLSI技术会议
+    - name: "VLSI"
+      year: 2025
+      keywords:
+        - "VLSI"
+        - "circuit"
+        - "SoC"
+        - "memory"
+    
+    # ISLPED - 低功耗电子设计
+    - name: "ISLPED"
+      year: 2025
+      keywords:
+        - "low power"
+        - "power management"
+        - "energy efficient"
+        - "circuit"
+    
   filter:
-    min_relevance_score: 0.5
-  
+    min_relevance_score: 0.0
+    
   limits:
-    max_papers_per_run: 10
+    max_papers_per_run: 20
 
 openai:
   model: "gpt-4o-mini"
-  temperature: 0.3
 
 mail:
   enabled: true
-  subject_prefix: "[ISSCC论文]"
+  subject_prefix: "[电路论文]"
