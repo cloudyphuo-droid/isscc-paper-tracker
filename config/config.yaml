@@ -18,6 +18,14 @@ tracker:
         - "power"
         - "AI chip"
         - "processor"
+        - "LLM"
+        - "large language model"
+        - "AI accelerator"
+        - "neural network"
+        - "transformer"
+        - "NPU"
+        - "inference"
+        - "GPU"
     
     # DAC - 设计自动化会议
     - name: "DAC"
