@@ -54,10 +54,11 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           TO_EMAILS: ${{ secrets.TO_EMAILS }}
           FROM_NAME: ${{ secrets.FROM_NAME }}
+          TEST_MODE: ${{ github.event.inputs.test_mode }}
         run: |
-          if [ "${{ github.event.inputs.test_mode }}" == "true" ]; then
-            echo "Test mode: skipping email"
-            # 可以添加逻辑禁用邮件
+          # 测试模式禁用邮件
+          if [ "$TEST_MODE" == "true" ]; then
+            export MAIL_ENABLED=false
           fi
           cd src && python main.py
       
