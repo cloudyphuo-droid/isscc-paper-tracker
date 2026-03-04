@@ -18,11 +18,21 @@ class SummaryGenerator:
         if not papers:
             return papers
         
-        if not os.getenv("OPENAI_API_KEY"):
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
             print("No OpenAI API key, using original abstracts")
             for paper in papers:
                 paper["summary_cn"] = paper.get("abstract", "")[:200] if paper.get("abstract") else "无摘要"
             return papers
+        
+        # 检查是否是无效的key（配额不足等）
+        if not api_key.startswith("sk-"):
+            print("Invalid OpenAI API key, using original abstracts")
+            for paper in papers:
+                paper["summary_cn"] = paper.get("abstract", "")[:200] if paper.get("abstract") else "无摘要"
+            return papers
+        
+        openai.api_key = api_key
         
         # 批量生成以节省API调用
         paper_texts = []

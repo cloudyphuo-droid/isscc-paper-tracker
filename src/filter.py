@@ -20,9 +20,17 @@ class PaperFilter:
         if not papers:
             return []
         
-        if not os.getenv("OPENAI_API_KEY"):
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
             print("No OpenAI API key, skipping AI filter")
-            return papers[:20]  # 返回前20篇
+            return papers[:20]
+        
+        # 检查是否是无效的key（配额不足等）
+        if not api_key.startswith("sk-"):
+            print("Invalid OpenAI API key, skipping AI filter")
+            return papers[:20]
+        
+        openai.api_key = api_key
         
         # 构建提示词
         keyword_str = ", ".join(self.keywords)
