@@ -47,6 +47,7 @@ jobs:
       - name: Run paper tracker
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
           IEEE_API_KEY: ${{ secrets.IEEE_API_KEY }}
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
