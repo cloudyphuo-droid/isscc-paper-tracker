@@ -11,7 +11,8 @@ from datetime import datetime
 class Mailer:
     def __init__(self):
         self.smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
-        self.smtp_port = int(os.getenv("SMTP_PORT", "587"))
+        smtp_port_str = os.getenv("SMTP_PORT", "587")
+        self.smtp_port = int(smtp_port_str) if smtp_port_str and smtp_port_str.strip() else 587
         self.username = os.getenv("SMTP_USERNAME")
         self.password = os.getenv("SMTP_PASSWORD")
         self.from_name = os.getenv("FROM_NAME", "ISSCC论文追踪")

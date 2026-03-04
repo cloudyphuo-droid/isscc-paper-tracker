@@ -48,6 +48,11 @@ def main():
     # 加载环境变量
     load_dotenv()
     
+    # 检查测试模式
+    test_mode = os.getenv("TEST_MODE", "").lower() == "true"
+    if test_mode:
+        print("测试模式：邮件功能已禁用")
+    
     # 加载配置
     config = load_config()
     tracker_config = config.get("tracker", {})
@@ -144,6 +149,10 @@ def main():
     # 4. 发送邮件
     print("\n[4/4] 正在发送邮件...")
     mail_enabled = config.get("mail", {}).get("enabled", True)
+    
+    # 测试模式下禁用邮件
+    if test_mode:
+        mail_enabled = False
     
     if mail_enabled:
         mailer = Mailer()
