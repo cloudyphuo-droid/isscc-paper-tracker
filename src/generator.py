@@ -1,8 +1,8 @@
-"""论文摘要生成模块 - 使用LLM生成中文摘要"""
-import openai
+"""论文摘要生成模块 - 支持OpenAI和智谱GLM API"""
 import os
 import json
 import re
+import requests
 from typing import List, Dict
 
 
@@ -10,29 +10,38 @@ class SummaryGenerator:
     """生成论文中文摘要"""
     
     def __init__(self, model: str = "gpt-4o-mini"):
-        openai.api_key = os.getenv("OPENAI_API_KEY")
         self.model = model
+        self.api_type = None
+        self._detect_api()
+    
+    def _detect_api(self):
+        """检测可用的API"""
+        # 优先使用智谱GLM
+        zhipu_key = os.getenv("ZHIPU_API_KEY")
+        if zhipu_key:
+            self.api_type = "zhipu"
+            self.api_key = zhipu_key
+            return
+        
+        # 其次使用OpenAI
+        openai_key = os.getenv("OPENAI_API_KEY")
+        if openai_key and openai_key.startswith("sk-"):
+            self.api_type = "openai"
+            self.api_key = openai_key
+            return
+        
+        self.api_type = None
     
     def generate_summaries(self, papers: List[Dict]) -> List[Dict]:
         """为论文列表生成中文摘要"""
         if not papers:
             return papers
         
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            print("No OpenAI API key, using original abstracts")
+        if not self.api_type:
+            print("No AI API key available, using original abstracts")
             for paper in papers:
                 paper["summary_cn"] = paper.get("abstract", "")[:200] if paper.get("abstract") else "无摘要"
             return papers
-        
-        # 检查是否是无效的key（配额不足等）
-        if not api_key.startswith("sk-"):
-            print("Invalid OpenAI API key, using original abstracts")
-            for paper in papers:
-                paper["summary_cn"] = paper.get("abstract", "")[:200] if paper.get("abstract") else "无摘要"
-            return papers
-        
-        openai.api_key = api_key
         
         # 批量生成以节省API调用
         paper_texts = []
@@ -61,13 +70,12 @@ class SummaryGenerator:
 """
         
         try:
-            response = openai.chat.completions.create(
-                model=self.model,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.5
-            )
+            if self.api_type == "zhipu":
+                result_text = self._call_zhipu(prompt)
+            else:
+                result_text = self._call_openai(prompt)
             
-            summaries = self._parse_json_response(response.choices[0].message.content)
+            summaries = self._parse_json_response(result_text)
             
             # 合并摘要到论文
             for s in summaries:
@@ -84,11 +92,42 @@ class SummaryGenerator:
             
         except Exception as e:
             print(f"Summary generation error: {e}")
-            # 出错时使用原文摘要
             for paper in papers:
                 paper["summary_cn"] = paper.get("abstract", "")[:150] if paper.get("abstract") else "无摘要"
         
         return papers
+    
+    def _call_zhipu(self, prompt: str) -> str:
+        """调用智谱GLM API"""
+        url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+        data = {
+            "model": "glm-4-flash",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.5
+        }
+        
+        response = requests.post(url, headers=headers, json=data, timeout=60)
+        if response.status_code == 200:
+            result = response.json()
+            return result.get("choices", [{}])[0].get("message", {}).get("content", "")
+        else:
+            raise Exception(f"Zhipu API error: {response.status_code} - {response.text}")
+    
+    def _call_openai(self, prompt: str) -> str:
+        """调用OpenAI API"""
+        import openai
+        openai.api_key = self.api_key
+        
+        response = openai.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.5
+        )
+        return response.choices[0].message.content
     
     def _parse_json_response(self, text: str) -> List[Dict]:
         """解析JSON响应"""

@@ -1,8 +1,8 @@
-"""AI论文相关性筛选模块 - 使用OpenAI API"""
-import openai
+"""AI论文相关性筛选模块 - 支持OpenAI和智谱GLM API"""
 import os
 import json
 import re
+import requests
 from typing import List, Dict
 
 
@@ -10,33 +10,44 @@ class PaperFilter:
     """使用LLM进行论文相关性筛选"""
     
     def __init__(self, keywords: List[str], min_score: float = 0.7, model: str = "gpt-4o-mini"):
-        openai.api_key = os.getenv("OPENAI_API_KEY")
         self.keywords = keywords
         self.min_score = min_score
         self.model = model
+        self.api_type = None
+        self._detect_api()
+    
+    def _detect_api(self):
+        """检测可用的API"""
+        # 优先使用智谱GLM
+        zhipu_key = os.getenv("ZHIPU_API_KEY")
+        if zhipu_key:
+            self.api_type = "zhipu"
+            self.api_key = zhipu_key
+            return
+        
+        # 其次使用OpenAI
+        openai_key = os.getenv("OPENAI_API_KEY")
+        if openai_key and openai_key.startswith("sk-"):
+            self.api_type = "openai"
+            self.api_key = openai_key
+            return
+        
+        self.api_type = None
     
     def filter_papers(self, papers: List[Dict]) -> List[Dict]:
         """批量筛选论文"""
         if not papers:
             return []
         
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            print("No OpenAI API key, skipping AI filter")
+        if not self.api_type:
+            print("No AI API key available, skipping AI filter")
             return papers[:20]
-        
-        # 检查是否是无效的key（配额不足等）
-        if not api_key.startswith("sk-"):
-            print("Invalid OpenAI API key, skipping AI filter")
-            return papers[:20]
-        
-        openai.api_key = api_key
         
         # 构建提示词
         keyword_str = ", ".join(self.keywords)
         
         # 准备论文信息（限制数量以避免超出token限制）
-        paper_list = papers[:30]  # 最多处理30篇
+        paper_list = papers[:30]
         
         paper_texts = []
         for i, paper in enumerate(paper_list):
@@ -62,13 +73,11 @@ class PaperFilter:
 只返回评分>=0.6的论文。
 """
         try:
-            response = openai.chat.completions.create(
-                model=self.model,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.3
-            )
+            if self.api_type == "zhipu":
+                result_text = self._call_zhipu(prompt)
+            else:
+                result_text = self._call_openai(prompt)
             
-            result_text = response.choices[0].message.content
             scores = self._parse_json_response(result_text)
             
             # 筛选高分论文
@@ -82,24 +91,52 @@ class PaperFilter:
                     paper["reason"] = score_info.get("reason", "")
                     filtered.append(paper)
             
-            # 按相关性排序
             filtered.sort(key=lambda x: x.get("relevance_score", 0), reverse=True)
             print(f"AI筛选后保留 {len(filtered)} 篇论文")
             return filtered
             
         except Exception as e:
             print(f"Filter error: {e}")
-            # 出错时返回所有论文
             return papers[:20]
+    
+    def _call_zhipu(self, prompt: str) -> str:
+        """调用智谱GLM API"""
+        url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+        data = {
+            "model": "glm-4-flash",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.3
+        }
+        
+        response = requests.post(url, headers=headers, json=data, timeout=60)
+        if response.status_code == 200:
+            result = response.json()
+            return result.get("choices", [{}])[0].get("message", {}).get("content", "")
+        else:
+            raise Exception(f"Zhipu API error: {response.status_code} - {response.text}")
+    
+    def _call_openai(self, prompt: str) -> str:
+        """调用OpenAI API"""
+        import openai
+        openai.api_key = self.api_key
+        
+        response = openai.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3
+        )
+        return response.choices[0].message.content
     
     def _parse_json_response(self, text: str) -> List[Dict]:
         """解析JSON响应"""
-        # 尝试提取JSON数组
         match = re.search(r'\[[\s\S]*\]', text)
         if match:
             try:
                 return json.loads(match.group())
             except json.JSONDecodeError as e:
                 print(f"JSON parse error: {e}")
-                print(f"Raw text: {text[:200]}")
         return []

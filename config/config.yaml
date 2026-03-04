@@ -75,6 +75,11 @@ tracker:
 openai:
   model: "gpt-4o-mini"
 
+# 智谱GLM API配置（可选）
+zhipu:
+  enabled: true
+  model: "glm-4-flash"  # 免费模型
+
 mail:
   enabled: true
   subject_prefix: "[电路论文]"
