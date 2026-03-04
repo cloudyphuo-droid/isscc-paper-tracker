@@ -36,6 +36,10 @@ tracker:
         - "physical design"
         - "verification"
         - "synthesis"
+        - "AI accelerator"
+        - "neural network"
+        - "LLM"
+        - "machine learning"
     
     # ICCAD - 计算机辅助设计
     - name: "ICCAD"
@@ -46,6 +50,9 @@ tracker:
         - "physical design"
         - "timing"
         - "power"
+        - "AI accelerator"
+        - "neural network"
+        - "LLM"
     
     # DATE - 欧洲设计自动化
     - name: "DATE"
@@ -55,6 +62,8 @@ tracker:
         - "automation"
         - "test"
         - "VLSI"
+        - "AI"
+        - "machine learning"
     
     # VLSI Symposium - VLSI技术会议
     - name: "VLSI"
@@ -64,6 +73,10 @@ tracker:
         - "circuit"
         - "SoC"
         - "memory"
+        - "AI chip"
+        - "NPU"
+        - "LLM"
+        - "neural network"
     
     # ISLPED - 低功耗电子设计
     - name: "ISLPED"
@@ -73,6 +86,9 @@ tracker:
         - "power management"
         - "energy efficient"
         - "circuit"
+        - "AI chip"
+        - "NPU"
+        - "inference"
     
   filter:
     min_relevance_score: 0.0
