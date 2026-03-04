@@ -1,0 +1,31 @@
+# ISSCC论文追踪系统配置
+
+tracker:
+  conferences:
+    - name: "ISSCC"
+      year: 2025
+      keywords:
+        - "circuit"
+        - "analog"
+        - "digital"
+        - "VLSI"
+        - "SoC"
+        - "memory"
+        - "ADC"
+        - "PLL"
+        - "RF"
+        - "power"
+  
+  filter:
+    min_relevance_score: 0.5
+  
+  limits:
+    max_papers_per_run: 10
+
+openai:
+  model: "gpt-4o-mini"
+  temperature: 0.3
+
+mail:
+  enabled: false
+  subject_prefix: "[ISSCC论文]"

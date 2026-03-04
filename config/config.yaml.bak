@@ -1,0 +1,53 @@
+# ISSCC论文追踪系统配置
+
+# 论文追踪配置
+tracker:
+  # 关注的会议列表
+  conferences:
+    - name: "ISSCC"
+      year: 2026
+      keywords:
+        - "circuit"
+        - "analog"
+        - "digital"
+        - "VLSI"
+        - "SoC"
+        - "memory"
+        - "ADC"
+        - "PLL"
+        - "RF"
+        - "power"
+        - "low power"
+        - "AI chip"
+        - "neural network"
+    - name: "ISSCC"
+      year: 2025
+      keywords:
+        - "circuit"
+        - "analog"
+        - "digital"
+        - "VLSI"
+        - "SoC"
+        - "memory"
+        - "ADC"
+        - "PLL"
+        - "RF"
+        - "power"
+  
+  # 筛选配置
+  filter:
+    min_relevance_score: 0.6  # 相关性分数阈值
+  
+  # 数量限制
+  limits:
+    max_papers_per_run: 15    # 每次推送最多论文数
+
+# OpenAI配置
+openai:
+  model: "gpt-4o-mini"        # 使用的模型
+  temperature: 0.3            # 采样温度
+
+# 邮件配置
+mail:
+  enabled: true               # 是否启用邮件推送
+  subject_prefix: "[ISSCC论文]"  # 邮件主题前缀
