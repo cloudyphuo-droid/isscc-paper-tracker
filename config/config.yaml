@@ -2,7 +2,30 @@
 
 tracker:
   conferences:
-    # ISSCC - 固态电路 (最顶级)
+    # ISSCC - 固态电路 (最顶级) - 每年2月
+    - name: "ISSCC"
+      year: 2026
+      keywords:
+        - "circuit"
+        - "analog"
+        - "digital"
+        - "VLSI"
+        - "SoC"
+        - "memory"
+        - "ADC"
+        - "PLL"
+        - "RF"
+        - "power"
+        - "AI chip"
+        - "processor"
+        - "LLM"
+        - "large language model"
+        - "AI accelerator"
+        - "neural network"
+        - "transformer"
+        - "NPU"
+        - "inference"
+        - "GPU"
     - name: "ISSCC"
       year: 2025
       keywords:
@@ -27,7 +50,19 @@ tracker:
         - "inference"
         - "GPU"
     
-    # DAC - 设计自动化会议
+    # DAC - 设计自动化会议 - 每年6月
+    - name: "DAC"
+      year: 2026
+      keywords:
+        - "EDA"
+        - "design automation"
+        - "physical design"
+        - "verification"
+        - "synthesis"
+        - "AI accelerator"
+        - "neural network"
+        - "LLM"
+        - "machine learning"
     - name: "DAC"
       year: 2025
       keywords:
@@ -41,7 +76,18 @@ tracker:
         - "LLM"
         - "machine learning"
     
-    # ICCAD - 计算机辅助设计
+    # ICCAD - 计算机辅助设计 - 每年11月
+    - name: "ICCAD"
+      year: 2026
+      keywords:
+        - "CAD"
+        - "VLSI"
+        - "physical design"
+        - "timing"
+        - "power"
+        - "AI accelerator"
+        - "neural network"
+        - "LLM"
     - name: "ICCAD"
       year: 2025
       keywords:
@@ -54,7 +100,16 @@ tracker:
         - "neural network"
         - "LLM"
     
-    # DATE - 欧洲设计自动化
+    # DATE - 欧洲设计自动化 - 每年4月
+    - name: "DATE"
+      year: 2026
+      keywords:
+        - "design"
+        - "automation"
+        - "test"
+        - "VLSI"
+        - "AI"
+        - "machine learning"
     - name: "DATE"
       year: 2025
       keywords:
@@ -65,7 +120,18 @@ tracker:
         - "AI"
         - "machine learning"
     
-    # VLSI Symposium - VLSI技术会议
+    # VLSI Symposium - VLSI技术会议 - 每年6月
+    - name: "VLSI"
+      year: 2026
+      keywords:
+        - "VLSI"
+        - "circuit"
+        - "SoC"
+        - "memory"
+        - "AI chip"
+        - "NPU"
+        - "LLM"
+        - "neural network"
     - name: "VLSI"
       year: 2025
       keywords:
@@ -78,7 +144,17 @@ tracker:
         - "LLM"
         - "neural network"
     
-    # ISLPED - 低功耗电子设计
+    # ISLPED - 低功耗电子设计 - 每年8月
+    - name: "ISLPED"
+      year: 2026
+      keywords:
+        - "low power"
+        - "power management"
+        - "energy efficient"
+        - "circuit"
+        - "AI chip"
+        - "NPU"
+        - "inference"
     - name: "ISLPED"
       year: 2025
       keywords:
@@ -94,7 +170,7 @@ tracker:
     min_relevance_score: 0.0
     
   limits:
-    max_papers_per_run: 20
+    max_papers_per_run: 30
 
 openai:
   model: "gpt-4o-mini"
@@ -102,7 +178,7 @@ openai:
 # 智谱GLM API配置（可选）
 zhipu:
   enabled: true
-  model: "glm-4-flash"  # 免费模型
+  model: "glm-4-flash"
 
 mail:
   enabled: true
