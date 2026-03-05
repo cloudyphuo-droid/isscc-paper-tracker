@@ -14,6 +14,9 @@ from filter import PaperFilter
 from generator import SummaryGenerator
 from mailer import Mailer
 
+# 缓存文件路径
+CACHE_FILE = os.path.join(os.path.dirname(__file__), '..', '.cache', 'sent_papers.json')
+
 
 def load_config(config_path: str = None) -> dict:
     """加载配置文件"""
@@ -28,6 +31,27 @@ def load_config(config_path: str = None) -> dict:
         with open(config_path, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
     return {}
+
+
+def load_sent_papers() -> set:
+    """加载已推送的论文URL"""
+    if os.path.exists(CACHE_FILE):
+        try:
+            with open(CACHE_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                return set(data.get('sent_urls', []))
+        except:
+            return set()
+    return set()
+
+
+def save_sent_papers(urls: set):
+    """保存已推送的论文URL"""
+    cache_dir = os.path.dirname(CACHE_FILE)
+    if not os.path.exists(cache_dir):
+        os.makedirs(cache_dir)
+    with open(CACHE_FILE, 'w', encoding='utf-8') as f:
+        json.dump({'sent_urls': list(urls)}, f)
 
 
 def collect_keywords(conferences: list) -> set:
@@ -105,18 +129,50 @@ def main():
             seen_titles.add(title_lower)
             unique_papers.append(paper)
     
-    print(f"  去重后共 {len(unique_papers)} 篇论文")
+    # 过滤已推送的论文（避免重复）
+    sent_urls = load_sent_papers()
+    new_papers = []
+    new_urls = []
+    for paper in unique_papers:
+        url = paper.get('url', '')
+        if url and url not in sent_urls:
+            new_papers.append(paper)
+            new_urls.append(url)
+        elif not url:
+            # 如果没有URL，用标题作为唯一标识
+            new_papers.append(paper)
     
-    if not unique_papers:
+    print(f"  去重后共 {len(unique_papers)} 篇论文")
+    print(f"  新论文: {len(new_papers)} 篇 (已过滤 {len(sent_urls)} 篇历史论文)")
+    
+    if not new_papers:
+        print("\n没有新论文，已全部推送过")
+        return
+    
+    # 保存新论文URL到缓存
+    if new_urls:
+        sent_urls.update(new_urls)
+        save_sent_papers(sent_urls)
+    
+    if not new_papers:
+        print("\n没有新论文，已全部推送过")
+        return
+    
+    # 保存新论文URL到缓存
+    if new_urls:
+        sent_urls.update(new_urls)
+        save_sent_papers(sent_urls)
+    
+    if not new_papers:
         print("\n没有获取到论文，尝试获取arXiv论文...")
         arxiv_papers = fetcher.fetch_from_arxiv(
             categories=["eess.AS", "cs.AR", "cs.LG"],
             max_results=20
         )
-        unique_papers = arxiv_papers
-        print(f"  获取到 {len(unique_papers)} 篇arXiv论文")
+        new_papers = arxiv_papers
+        print(f"  获取到 {len(new_papers)} 篇arXiv论文")
     
-    if not unique_papers:
+    if not new_papers:
         print("\n没有获取到任何论文，程序退出")
         return
     
@@ -127,7 +183,7 @@ def main():
         min_score=tracker_config.get("filter", {}).get("min_relevance_score", 0.6),
         model=config.get("openai", {}).get("model", "gpt-4o-mini")
     )
-    filtered_papers = paper_filter.filter_papers(unique_papers)
+    filtered_papers = paper_filter.filter_papers(new_papers)
     
     # 限制数量
     max_papers = tracker_config.get("limits", {}).get("max_papers_per_run", 15)
