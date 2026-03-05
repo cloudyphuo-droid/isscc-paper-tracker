@@ -85,12 +85,13 @@ class PaperFetcher:
         
         conf_key = conf_mapping.get(conference.lower(), conference.lower())
         
-        # 使用正确的DBLP查询格式
+        # 使用正确的DBLP查询格式，按时间排序
         params = {
             "q": f"{conf_key} {year}",
             "h": max_results,
             "format": "json",
-            "f": 0
+            "f": 0,
+            "sort": "cdate:decreasing"  # 按创建时间降序（最新在前）
         }
         
         try:
